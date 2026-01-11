@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>FarmQuest - Ферма</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="styles.css">
+<style>
+.seed-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-right: 15px;
+}
+.seed-option {
+    padding: 10px;
+    border-radius: 10px;
+    border: 2px solid #e0f2e9;
+    background: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: 0.2s;
+}
+.seed-option.active {
+    border-color: #4b8b3b;
+    background: #f0f9f0;
+}
+.seed-option:hover {
+    transform: translateY(-2px);
+}
+.seed-emoji {
+    font-size: 24px;
+}
+.seed-info {
+    font-size: 12px;
+    color: #555;
+}
+.farm-with-selector {
+    display: flex;
+}
+.btn-back {
+    margin-top: 15px;
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 15px;
+    background: #bdbdbd;
+    color: #333;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.btn-back:hover {
+    background: #9e9e9e;
+}
+#snakeCanvas {
+    border: 2px solid #4b8b3b;
+    border-radius: 10px;
+    background: #f0f9f0;
+    display: block;
+    margin: 0 auto;
+}
+.snake-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-top: 15px;
+}
+.snake-row {
+    display: flex;
+    gap: 10px;
+}
+.snake-btn {
+    width: 60px;
+    height: 60px;
+    font-size: 24px;
+    border: none;
+    border-radius: 10px;
+    background: #4b8b3b;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.snake-btn:hover {
+    background: #3a6e2c;
+}
+.snake-info {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 14px;
+    color: #555;
+    padding: 10px;
+    background: #f7fbf4;
+    border-radius: 8px;
+}
+</style>
+</head>
+<body>
+<div class="farm-container">
+    <div class="map-panel">
+        <h2>Карта фермы</h2>
+        <p class="map-subtitle">Выберите локацию: поля, магазины или миниигры</p>
+        <div class="map-grid">
+            <div class="map-tile active" data-location="farm">
+                <span class="icon">🌾</span>
+                <div class="map-tile-title">Поля</div>
+                <div class="map-tile-desc">Сажайте и собирайте урожай</div>
+            </div>
+            <div class="map-tile" data-location="seeds">
+                <span class="icon">🌱</span>
+                <div class="map-tile-title">Магазин семян</div>
+                <div class="map-tile-desc">Покупка разных культур</div>
+            </div>
+            <div class="map-tile" data-location="tools">
+                <span class="icon">🪓</span>
+                <div class="map-tile-title">Инструменты</div>
+                <div class="map-tile-desc">Бонус к сбору урожая</div>
+            </div>
+            <div class="map-tile" data-location="equipment">
+                <span class="icon">🚜</span>
+                <div class="map-tile-title">Оборудование</div>
+                <div class="map-tile-desc">Рост и доп. поля</div>
+            </div>
+            <div class="map-tile" data-location="minigames">
+                <span class="icon">🎮</span>
+                <div class="map-tile-title">Миниигры</div>
+                <div class="map-tile-desc">Зарабатывайте бонусные монеты</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="detail-panel">
+        <div class="detail-header">
+            <div>
+                <h2 id="detailTitle">Поля</h2>
+                <small>Персонаж: <span id="currentCharLabel">Гость</span></small>
+            </div>
+            <div class="balance">
+                Монет: <span id="coinsLabel">100</span>
+            </div>
+        </div>
+
+        <div class="detail-tabs">
+            <div class="detail-tab active" data-tab="farm">Поля</div>
+            <div class="detail-tab" data-tab="seeds">Семена</div>
+            <div class="detail-tab" data-tab="tools">Инструменты</div>
+            <div class="detail-tab" data-tab="equipment">Оборудование</div>
+            <div class="detail-tab" data-tab="minigames">Миниигры</div>
+        </div>
+
+        <div class="detail-content" id="detailContent"></div>
+        <button class="btn-back" onclick="window.location.href='screentest(1).html'">⬅️ В главное меню</button>
+    </div>
+</div>
+
+<div class="modal" id="minigameModal">
+    <div class="modal-content">
+        <h2 id="minigameTitle">Миниигры</h2>
+        <p id="minigameSubtitle">Выберите игру: Рыбалка, Поймай морковку или Кролик-змейка</p>
+        <div style="display:flex; gap:8px; margin-bottom:10px; justify-content:center; flex-wrap:wrap;">
+            <button class="seed-buy-btn" onclick="startFishingGame()">🎣 Рыбалка</button>
+            <button class="seed-buy-btn" onclick="startCarrotGame()">🐰 Поймай морковку</button>
+            <button class="seed-buy-btn" onclick="startSnakeGame()">🐇 Кролик-змейка</button>
+        </div>
+        <div id="minigameArea" style="border-radius:12px; border:1px solid #e0f2e9; padding:10px; text-align:center; font-size:13px; color:#555; min-height:260px;">
+            Выберите миниигру выше, чтобы начать.
+        </div>
+        <div style="margin-top:15px; display:flex; gap:10px;">
+            <button type="button" class="btn btn-start" onclick="closeMinigame()">Закрыть</button>
+        </div>
+    </div>
+</div>
+
+<script src="script.js"></script>
+<script src="snake-game.js"></script>
+<script>
+let farmState = Array(9).fill('empty');
+let plantedTime = Array(9).fill(0);
+let plantedSeed = Array(9).fill('');
+let coins = 100;
+let selectedSeed = 'wheat';
+let seedsInventory = {'wheat': 5, 'carrot': 3, 'corn': 2};
+let currentLocation = 'farm';
+let tools = {'scythe': false, 'hoe': false, 'watering_can': false};
+let equipment = {'tractor': false, 'irrigation': false, 'second_field': false};
+let growthMultiplier = 1;
+let harvestBonus = 0;
+let snakeGameInstance = null;
+
+const SEEDS = {
+    'wheat': { name: 'Пшеница', emoji: '🌾', price: 10, reward: 3, growTime: 5000 },
+    'carrot': { name: 'Морковь', emoji: '🥕', price: 15, reward: 5, growTime: 8000 },
+    'corn': { name: 'Кукуруза', emoji: '🌽', price: 20, reward: 8, growTime: 12000 }
+};
+
+const TOOLS_SHOP = [
+    { id: 'scythe', name: 'Острая коса', emoji: '🔪', price: 50, desc: '+1 монета за сбор', bonus: 1 },
+    { id: 'hoe', name: 'Золотая мотыга', emoji: '⛏️', price: 100, desc: '+2 монеты за сбор', bonus: 2 },
+    { id: 'watering_can', name: 'Волшебная лейка', emoji: '🚰', price: 150, desc: '+3 монеты за сбор', bonus: 3 }
+];
+
+const EQUIPMENT_SHOP = [
+    { id: 'tractor', name: 'Мини-трактор', emoji: '🚜', price: 200, desc: 'Ускоряет рост на 20%', effect: 0.8 },
+    { id: 'irrigation', name: 'Система полива', emoji: '💧', price: 300, desc: 'Ускоряет рост на 30%', effect: 0.7 },
+    { id: 'second_field', name: 'Второе поле', emoji: '🧩', price: 500, desc: 'Открывает второе поле' }
+];
+
+document.addEventListener('DOMContentLoaded', function() {
+    selectLocation('farm');
+    document.querySelectorAll('.map-tile').forEach(tile => {
+        tile.addEventListener('click', function() {
+            selectLocation(this.dataset.location);
+        });
+    });
+    document.querySelectorAll('.detail-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            selectLocation(this.dataset.tab);
+        });
+    });
+});
+
+function selectLocation(location) {
+    currentLocation = location;
+    document.querySelectorAll('.map-tile').forEach(tile => {
+        tile.classList.toggle('active', tile.dataset.location === location);
+    });
+    document.querySelectorAll('.detail-tab').forEach(tab => {
+        tab.classList.toggle('active', tab.dataset.tab === location);
+    });
+    const titles = {
+        'farm': 'Поля', 'seeds': 'Магазин семян', 'tools': 'Инструменты',
+        'equipment': 'Оборудование', 'minigames': 'Миниигры'
+    };
+    document.getElementById('detailTitle').textContent = titles[location] || 'Поля';
+    updateContent(location);
+}
+
+function updateContent(location) {
+    const content = document.getElementById('detailContent');
+    
+    if (location === 'farm') {
+        content.innerHTML = `
+            <div class="farm-with-selector">
+                <div class="seed-selector">
+                    <div class="seed-option ${selectedSeed === 'wheat' ? 'active' : ''}" onclick="selectSeedType('wheat')">
+                        <span class="seed-emoji">🌾</span>
+                        <div>
+                            <div><strong>Пшеница</strong></div>
+                            <div class="seed-info">${seedsInventory.wheat} шт.</div>
+                        </div>
+                    </div>
+                    <div class="seed-option ${selectedSeed === 'carrot' ? 'active' : ''}" onclick="selectSeedType('carrot')">
+                        <span class="seed-emoji">🥕</span>
+                        <div>
+                            <div><strong>Морковь</strong></div>
+                            <div class="seed-info">${seedsInventory.carrot} шт.</div>
+                        </div>
+                    </div>
+                    <div class="seed-option ${selectedSeed === 'corn' ? 'active' : ''}" onclick="selectSeedType('corn')">
+                        <span class="seed-emoji">🌽</span>
+                        <div>
+                            <div><strong>Кукуруза</strong></div>
+                            <div class="seed-info">${seedsInventory.corn} шт.</div>
+                        </div>
+                    </div>
+                </div>
+                <div style="flex:1;">
+                    <div class="single-farm">
+                        <div class="single-farm-header">
+                            <div class="single-farm-title">Поле 1 (основное)</div>
+                            <div class="single-farm-tools">
+                                Бонус: +${harvestBonus} монет • Скорость: ${Math.round((1/growthMultiplier)*100)}%
+                            </div>
+                        </div>
+                        <div class="farm-grid" id="farmGrid1"></div>
+                    </div>
+                    ${equipment.second_field ? `
+                    <div class="single-farm" style="margin-top:15px;">
+                        <div class="single-farm-header">
+                            <div class="single-farm-title">Поле 2 (дополнительное)</div>
+                            <div class="single-farm-tools">
+                                Бонус: +${harvestBonus} монет • Скорость: ${Math.round((1/growthMultiplier)*100)}%
+                            </div>
+                        </div>
+                        <div class="farm-grid" id="farmGrid2"></div>
+                    </div>
+                    ` : ''}
+                    <p style="font-size:12px; color:#777; text-align:center; margin-top:10px;">
+                        Нажимайте на клетки: пусто → вспахано → посеяно → (растёт) → готово → пусто.
+                    </p>
+                </div>
+            </div>
+        `;
+        
+        createFarmGrid('farmGrid1', 0);
+        if (equipment.second_field) {
+            createFarmGrid('farmGrid2', 9);
+        }
+        
+    } else if (location === 'seeds') {
+        content.innerHTML = `
+            <div>
+                <p style="font-size:13px; color:#777; margin-bottom:6px;">
+                    Покупка пакетов семян. За каждую покупку вы получаете 5 штук.
+                </p>
+                <div class="seeds-shop" id="seedsShop">
+                    ${Object.entries(SEEDS).map(([id, seed]) => `
+                        <div class="seed-item">
+                            <div class="seed-header">
+                                <span class="emoji">${seed.emoji}</span>
+                                <div class="seed-name">${seed.name}</div>
+                            </div>
+                            <div class="seed-desc">Растёт ${seed.growTime/1000} сек, даёт ${seed.reward} монет</div>
+                            <div class="seed-footer">
+                                <div>
+                                    <div class="seed-price">${seed.price} монет</div>
+                                    <div class="seed-owned ${seedsInventory[id] > 0 ? '' : 'none'}">
+                                        На складе: ${seedsInventory[id]} шт.
+                                    </div>
+                                </div>
+                                <button class="seed-buy-btn" onclick="buySeed('${id}')">Купить (5 шт.)</button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+        
+    } else if (location === 'tools') {
+        content.innerHTML = `
+            <div>
+                <p style="font-size:13px; color:#777; margin-bottom:6px;">
+                    Инструменты увеличивают монеты за каждый сбор урожая.
+                </p>
+                <div class="shop-list" id="toolsShop">
+                    ${TOOLS_SHOP.map(tool => `
+                        <div class="shop-item">
+                            <div class="shop-header">
+                                <span class="emoji">${tool.emoji}</span>
+                                <div class="shop-name">${tool.name}</div>
+                            </div>
+                            <div class="shop-desc">${tool.desc}</div>
+                            <div class="shop-footer">
+                                <div>
+                                    <div class="shop-price">${tool.price} монет</div>
+                                    <div class="shop-owned ${tools[tool.id] ? '' : 'none'}">
+                                        ${tools[tool.id] ? 'Куплено' : 'Не куплено'}
+                                    </div>
+                                </div>
+                                <button class="shop-buy-btn" ${tools[tool.id] ? 'disabled' : ''} onclick="buyTool('${tool.id}')">
+                                    Купить
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+        
+    } else if (location === 'equipment') {
+        content.innerHTML = `
+            <div>
+                <p style="font-size:13px; color:#777; margin-bottom:6px;">
+                    Оборудование ускоряет рост растений и открывает новое поле.
+                </p>
+                <div class="shop-list" id="equipmentShop">
+                    ${EQUIPMENT_SHOP.map(item => `
+                        <div class="shop-item">
+                            <div class="shop-header">
+                                <span class="emoji">${item.emoji}</span>
+                                <div class="shop-name">${item.name}</div>
+                            </div>
+                            <div class="shop-desc">${item.desc}</div>
+                            <div class="shop-footer">
+                                <div>
+                                    <div class="shop-price">${item.price} монет</div>
+                                    <div class="shop-owned ${equipment[item.id] ? '' : 'none'}">
+                                        ${equipment[item.id] ? 'Куплено' : 'Не куплено'}
+                                    </div>
+                                </div>
+                                <button class="shop-buy-btn" ${equipment[item.id] ? 'disabled' : ''} onclick="buyEquipment('${item.id}')">
+                                    Купить
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+        
+    } else if (location === 'minigames') {
+        content.innerHTML = `
+            <div class="minigames-placeholder">
+                Здесь доступны миниигры, за которые можно получить дополнительные монеты.
+                <div class="minigame-card">
+                    🎣 Рыбалка, 🐰 Поймай морковку и 🐇 Кролик-змейка<br>
+                    <button class="seed-buy-btn" style="margin-top:6px; padding:6px 14px;" onclick="openMinigame()">
+                        Открыть окно миниигр
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+}
+
+function createFarmGrid(gridId, startIndex) {
+    const grid = document.getElementById(gridId);
+    if (!grid) return;
+    grid.innerHTML = '';
+    
+    for (let i = 0; i < 9; i++) {
+        const globalIndex = startIndex + i;
+        const tile = document.createElement('div');
+        const seedType = plantedSeed[globalIndex];
+        
+        tile.className = `tile ${farmState[globalIndex]}`;
+        tile.dataset.index = globalIndex;
+        
+        if (farmState[globalIndex] === 'empty') {
+            tile.innerHTML = '⬜';
+        } else if (farmState[globalIndex] === 'tilled') {
+            tile.innerHTML = '🪓';
+        } else if (farmState[globalIndex] === 'planted') {
+            tile.innerHTML = seedType ? SEEDS[seedType].emoji : '🌱';
+        } else if (farmState[globalIndex] === 'ready') {
+            tile.innerHTML = '✅';
+        }
+        
+        tile.addEventListener('click', () => handleTileClick(globalIndex, tile));
+        grid.appendChild(tile);
+    }
+}
+
+function selectSeedType(seedType) {
+    selectedSeed = seedType;
+    updateContent('farm');
+}
+
+function handleTileClick(index, tileElement) {
+    if (!tileElement) {
+        tileElement = document.querySelector(`[data-index="${index}"]`);
+    }
+    
+    switch(farmState[index]) {
+        case 'empty':
+            farmState[index] = 'tilled';
+            tileElement.className = 'tile tilled';
+            tileElement.innerHTML = '🪓';
+            break;
+            
+        case 'tilled':
+            if (seedsInventory[selectedSeed] > 0) {
+                farmState[index] = 'planted';
+                plantedSeed[index] = selectedSeed;
+                plantedTime[index] = Date.now();
+                seedsInventory[selectedSeed]--;
+                tileElement.className = 'tile planted';
+                tileElement.innerHTML = SEEDS[selectedSeed].emoji;
+                
+                setTimeout(() => {
+                    if (farmState[index] === 'planted') {
+                        farmState[index] = 'ready';
+                        const currentTile = document.querySelector(`[data-index="${index}"]`);
+                        if (currentTile) {
+                            currentTile.className = 'tile ready';
+                            currentTile.innerHTML = '✅';
+                        }
+                    }
+                }, SEEDS[selectedSeed].growTime * growthMultiplier);
+            } else {
+                showMessage(`Нет семян ${SEEDS[selectedSeed].name}!`);
+            }
+            break;
+            
+        case 'planted':
+            showMessage('Ещё растёт...');
+            break;
+            
+        case 'ready':
+            const seedType = plantedSeed[index];
+            const baseReward = SEEDS[seedType].reward;
+            const totalReward = baseReward + harvestBonus;
+            
+            coins += totalReward;
+            document.getElementById('coinsLabel').textContent = coins;
+            
+            farmState[index] = 'empty';
+            plantedSeed[index] = '';
+            tileElement.className = 'tile empty';
+            tileElement.innerHTML = '⬜';
+            
+            showMessage(`Собрано +${totalReward} монет!`);
+            break;
+    }
+}
+
+function buySeed(seedId) {
+    const seed = SEEDS[seedId];
+    if (coins >= seed.price) {
+        coins -= seed.price;
+        seedsInventory[seedId] += 5;
+        document.getElementById('coinsLabel').textContent = coins;
+        showMessage(`Куплено 5 семян ${seed.name}!`);
+        updateContent('seeds');
+    } else {
+        showMessage('Недостаточно монет!');
+    }
+}
+
+function buyTool(toolId) {
+    const tool = TOOLS_SHOP.find(t => t.id === toolId);
+    if (!tool) return;
+    
+    if (coins >= tool.price) {
+        coins -= tool.price;
+        tools[toolId] = true;
+        harvestBonus += tool.bonus;
+        document.getElementById('coinsLabel').textContent = coins;
+        showMessage(`Куплено: ${tool.name}!`);
+        updateContent('tools');
+    } else {
+        showMessage('Недостаточно монет!');
+    }
+}
+
+function buyEquipment(itemId) {
+    const item = EQUIPMENT_SHOP.find(e => e.id === itemId);
+    if (!item) return;
+    
+    if (coins >= item.price) {
+        coins -= item.price;
+        equipment[itemId] = true;
+        
+        if (itemId === 'tractor' || itemId === 'irrigation') {
+            growthMultiplier *= item.effect;
+        }
+        
+        document.getElementById('coinsLabel').textContent = coins;
+        showMessage(`Куплено: ${item.name}!`);
+        updateContent('equipment');
+        
+        if (itemId === 'second_field') {
+            setTimeout(() => updateContent('farm'), 100);
+        }
+    } else {
+        showMessage('Недостаточно монет!');
+    }
+}
+
+function openMinigame() {
+    document.getElementById('minigameModal').style.display = 'flex';
+}
+
+function closeMinigame() {
+    document.getElementById('minigameModal').style.display = 'none';
+}
+
+function startFishingGame() {
+    document.getElementById('minigameArea').innerHTML = `
+        <h3>🎣 Рыбалка</h3>
+        <p>Ловите рыбу, нажимая на кнопку!</p>
+        <button onclick="catchFish()" style="padding:10px 20px; font-size:16px; margin:10px;">
+            🎣 Забросить удочку
+        </button>
+        <div id="fishingResult"></div>
+    `;
+}
+
+function catchFish() {
+    const fish = ['🐟 (+3 монеты)', '🐠 (+5 монет)', '🐡 (+8 монет)', '🩴 (ничего)', '🗑 (ничего)'];
+    const result = fish[Math.floor(Math.random() * fish.length)];
+    const reward = result.includes('+3') ? 3 : result.includes('+5') ? 5 : result.includes('+8') ? 8 : 0;
+    
+    if (reward > 0) {
+        coins += reward;
+        document.getElementById('coinsLabel').textContent = coins;
+    }
+    
+    document.getElementById('fishingResult').innerHTML = `
+        <p>Вы поймали: ${result}</p>
+        <button onclick="catchFish()" style="padding:8px 16px; margin-top:10px;">
+            🎣 Забросить снова
+        </button>
+    `;
+}
+
+function startCarrotGame() {
+    document.getElementById('minigameArea').innerHTML = `
+        <h3>🐰 Поймай морковку</h3>
+        <p>Кликайте на падающие морковки!</p>
+        <div style="position:relative; height:200px; border:1px solid #ccc; border-radius:8px; overflow:hidden; margin:10px 0;">
+            <div id="carrotGameArea"></div>
+        </div>
+        <button onclick="startCarrotDropping()" style="padding:10px 20px; font-size:16px;">
+            🐰 Начать игру
+        </button>
+        <div id="carrotScore">Очки: 0</div>
+    `;
+}
+
+function startCarrotDropping() {
+    const area = document.getElementById('carrotGameArea');
+    area.innerHTML = '';
+    let score = 0;
+    const updateScore = () => {
+        document.getElementById('carrotScore').textContent = `Очки: ${score}`;
+    };
+    
+    for (let i = 0; i < 5; i++) {
+        setTimeout(() => {
+            const carrot = document.createElement('div');
+            carrot.style.cssText = `
+                position: absolute;
+                top: -30px;
+                left: ${20 + Math.random() * 80}%;
+                font-size: 30px;
+                cursor: pointer;
+                animation: fall 2s linear;
+            `;
+            carrot.innerHTML = '🥕';
+            carrot.onclick = () => {
+                score += 2;
+                coins += 2;
+                document.getElementById('coinsLabel').textContent = coins;
+                updateScore();
+                carrot.remove();
+            };
+            area.appendChild(carrot);
+            
+            setTimeout(() => carrot.remove(), 2000);
+        }, i * 500);
+    }
+    
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes fall {
+            from { top: -30px; }
+            to { top: 170px; }
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+function startSnakeGame() {
+    document.getElementById('minigameArea').innerHTML = `
+        <h3>🐇 Кролик-змейка</h3>
+        <p>Управляйте кроликом и собирайте морковки! Стрелки на клавиатуре или кнопки ниже.</p>
+        <canvas id="snakeCanvas" width="400" height="400"></canvas>
+        <div class="snake-info">
+            <div>Собрано морковок: <span id="snakeScore">0</span></div>
+            <div>Приз: <span id="snakePrize">0</span> монет</div>
+        </div>
+        <div class="snake-controls">
+            <div class="snake-row">
+                <button class="snake-btn" onclick="snakeChangeDirection('up')">⬆️</button>
+            </div>
+            <div class="snake-row">
+                <button class="snake-btn" onclick="snakeChangeDirection('left')">⬅️</button>
+                <button class="snake-btn" onclick="snakePauseResume()">⏯️</button>
+                <button class="snake-btn" onclick="snakeChangeDirection('right')">➡️</button>
+            </div>
+            <div class="snake-row">
+                <button class="snake-btn" onclick="snakeChangeDirection('down')">⬇️</button>
+            </div>
+        </div>
+        <div style="margin-top:10px;">
+            <button class="seed-buy-btn" onclick="snakeRestartGame()">🔄 Начать заново</button>
+        </div>
+    `;
+    
+    if (typeof SnakeGame !== 'undefined') {
+        snakeGameInstance = new SnakeGame(
+            'snakeCanvas', 
+            'snakeScore', 
+            'snakePrize', 
+            function(score, prize) {
+                if (prize > 0) {
+                    coins += prize;
+                    document.getElementById('coinsLabel').textContent = coins;
+                    showMessage(`Игра окончена! Вы получили ${prize} монет!`);
+                }
+            }
+        );
+        snakeGameInstance.start();
+    }
+}
+
+function snakeChangeDirection(dir) {
+    if (snakeGameInstance) {
+        snakeGameInstance.changeDirection(dir);
+    }
+}
+
+function snakePauseResume() {
+    if (snakeGameInstance) {
+        snakeGameInstance.pauseResume();
+    }
+}
+
+function snakeRestartGame() {
+    if (snakeGameInstance) {
+        snakeGameInstance.start();
+    }
+}
+
+function showMessage(text) {
+    const message = document.createElement('div');
+    message.style.cssText = `
+        position:fixed; top:20px; right:20px; background:#4b8b3b; color:white; 
+        padding:10px 15px; border-radius:10px; z-index:1000; animation:fadeInOut 3s;
+    `;
+    message.textContent = text;
+    document.body.appendChild(message);
+    setTimeout(() => message.remove(), 3000);
+    
+    if (!document.querySelector('#messageStyle')) {
+        const style = document.createElement('style');
+        style.id = 'messageStyle';
+        style.textContent = `
+            @keyframes fadeInOut {
+                0% { opacity:0; transform:translateX(100px); }
+                10% { opacity:1; transform:translateX(0); }
+                90% { opacity:1; transform:translateX(0); }
+                100% { opacity:0; transform:translateX(100px); }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+}
+</script>
+</body>
+</html>
