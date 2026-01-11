@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>FarmQuest</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .audio-hint {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #4b8b3b;
+      color: white;
+      padding: 15px 25px;
+      border-radius: 15px;
+      z-index: 9999;
+      font-size: 16px;
+      font-weight: bold;
+      text-align: center;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+      animation: pulseHint 1.5s infinite;
+      border: 3px solid #ffeb3b;
+    }
+    
+    @keyframes pulseHint {
+      0% { transform: translateX(-50%) scale(1); }
+      50% { transform: translateX(-50%) scale(1.05); }
+      100% { transform: translateX(-50%) scale(1); }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="audioHint" class="audio-hint">👆 КЛИКНИТЕ ДЛЯ ЗВУКОВ</div>
+
+  <div class="screen menu" id="menuScreen">
+    <h1>Farm<span>Quest</span></h1>
+    <p>Развивай ферму и управляй персонажами</p>
+
+    <div class="current-user">
+      Аккаунт: <span id="currentUserLabel">Не вошли</span>
+    </div>
+
+    <button class="btn btn-start" onclick="startGame()">🌱 Войти на карту</button>
+    <button class="btn btn-secondary" onclick="showScreen('dbScreen')">👤 Управление персонажами</button>
+    <button class="btn btn-secondary" onclick="loginAsGuest()">🙋 Войти как гость</button>
+    <button class="btn btn-secondary" onclick="showLoginModal()">🔑 Войти в аккаунт</button>
+    <button class="btn btn-secondary" onclick="showRegisterModal()">📝 Регистрация</button>
+
+    <button class="btn-logout" onclick="logout()" id="logoutBtn" style="display:none;">Выйти из аккаунта</button>
+    
+    <div class="sound-controls">
+      <div class="volume-control">
+        <label>🎵 Фоновая музыка:</label>
+        <input type="range" id="musicVolume" min="0" max="100" value="50" class="volume-slider">
+        <span id="musicVolumeValue">50%</span>
+      </div>
+      <div class="volume-control">
+        <label>🔊 Звуковые эффекты:</label>
+        <input type="range" id="sfxVolume" min="0" max="100" value="70" class="volume-slider">
+        <span id="sfxVolumeValue">70%</span>
+      </div>
+    </div>
+    
+    <div style="text-align: center; margin-top: 15px; color: #777; font-size: 14px;">
+      <p>После клика на странице звуки будут работать</p>
+    </div>
+  </div>
+
+  <script src="audio.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
