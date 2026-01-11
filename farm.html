@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>FarmQuest - Ферма</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="screen game" id="gameScreen">
+        <div class="game-layout">
+            <div class="map-panel">
+                <h2>Карта</h2>
+                <p class="map-subtitle">Выберите локацию: поля, магазины или миниигры</p>
+                <div class="map-grid">
+                    <div class="map-tile active" data-location="farm">
+                        <span class="icon"></span>
+                        <div class="map-tile-title"></div>
+                        <div class="map-tile-desc"></div>
+                    </div>
+                    <div class="map-tile" data-location="seeds">
+                        <span class="icon"></span>
+                        <div class="map-tile-title"></div>
+                        <div class="map-tile-desc"></div>
+                    </div>
+                    <div class="map-tile" data-location="tools">
+                        <span class="icon"></span>
+                        <div class="map-tile-title"></div>
+                        <div class="map-tile-desc"></div>
+                    </div>
+                    <div class="map-tile" data-location="minigames">
+                        <span class="icon"></span>
+                        <div class="map-tile-title"></div>
+                        <div class="map-tile-desc"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="detail-panel">
+                <div class="detail-header">
+                    <div>
+                        <h2 id="detailTitle">Ферма</h2>
+                        <small><span id="currentCharLabel"></span></small>
+                    </div>
+                    <div class="balance">
+                        <span id="coinsLabel">0</span>
+                    </div>
+                </div>
+                <div class="detail-tabs">
+                    <div class="detail-tab active" data-tab="farm"></div>
+                    <div class="detail-tab" data-tab="seeds"></div>
+                    <div class="detail-tab" data-tab="tools"></div>
+                    <div class="detail-tab" data-tab="minigames"></div>
+                </div>
+                <div class="detail-content" id="detailContent">
+                    <div class="farms-wrapper">
+                        <div class="single-farm">
+                            <div class="single-farm-header">
+                                <div class="single-farm-title">Ферма 1</div>
+                                <div class="single-farm-tools" id="farm1ToolsLabel"></div>
+                            </div>
+                            <div class="farm-grid-placeholder">
+                                <p style="text-align: center; color: #777; padding: 40px;">Поле фермы</p>
+                            </div>
+                        </div>
+                        <div class="single-farm" id="farm2Container">
+                            <div class="locked-farm">
+                                <div>
+                                    <p style="font-size: 12px; color: #777; text-align: center;"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-back" onclick="goToMenu()" style="margin-top: 15px;">Назад</button>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+    <script>
+        let activeLocation = 'farm';
+        function selectLocation(loc) {
+            activeLocation = loc;
+            document.querySelectorAll('.map-tile').forEach(t => {
+                t.classList.toggle('active', t.dataset.location === loc);
+            });
+            document.querySelectorAll('.detail-tab').forEach(t => {
+                t.classList.toggle('active', t.dataset.tab === loc);
+            });
+            applyLocationUI();
+        }
+        function applyLocationUI() {
+            const title = document.getElementById('detailTitle');
+            if (activeLocation === 'farm') {
+                title.textContent = 'Ферма';
+            } else if (activeLocation === 'seeds') {
+                title.textContent = 'Семена';
+            } else if (activeLocation === 'tools') {
+                title.textContent = 'Инструменты';
+            } else if (activeLocation === 'minigames') {
+                title.textContent = 'Миниигры';
+            }
+        }
+        function goToMenu() {
+            window.location.href = 'screentest(1).html';
+        }
+        window.onload = applyLocationUI;
+    </script>
+</body>
+</html>
